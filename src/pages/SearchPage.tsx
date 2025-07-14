@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { searchRecipes } from '../data/recipes';
+import { ref as dbRef, get } from 'firebase/database';
+import { database } from '../lib/firebase';
 import RecipeGrid from '../components/RecipeGrid';
 import { Recipe } from '../types';
 
@@ -8,17 +9,34 @@ const SearchPage: React.FC = () => {
   const location = useLocation();
   const [searchResults, setSearchResults] = useState<Recipe[]>([]);
   const [query, setQuery] = useState('');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
     const queryParam = searchParams.get('q') || '';
     setQuery(queryParam);
-    
+
+    const fetchRecipes = async () => {
+      const snapshot = await get(dbRef(database, 'recipes'));
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        const allRecipes = Object.values(data) as Recipe[];
+        const results = allRecipes.filter(recipe =>
+          recipe.title.toLowerCase().includes(queryParam.toLowerCase()) ||
+          recipe.ingredients.some(ingredient => ingredient.toLowerCase().includes(queryParam.toLowerCase()))
+        );
+        setSearchResults(results);
+      } else {
+        setSearchResults([]);
+      }
+      setLoading(false);
+    };
+
     if (queryParam) {
-      const results = searchRecipes(queryParam);
-      setSearchResults(results);
+      fetchRecipes();
     } else {
       setSearchResults([]);
+      setLoading(false);
     }
   }, [location.search]);
 

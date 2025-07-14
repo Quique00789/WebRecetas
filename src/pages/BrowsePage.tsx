@@ -1,15 +1,32 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Filter, X } from 'lucide-react';
-import { recipes } from '../data/recipes';
+import { ref as dbRef, get } from 'firebase/database';
+import { database } from '../lib/firebase';
 import RecipeGrid from '../components/RecipeGrid';
 import RecipeMenu from '../components/RecipeMenu';
 import { FoodType, Recipe } from '../types';
 
 const BrowsePage: React.FC = () => {
+  const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [selectedFoodTypes, setSelectedFoodTypes] = useState<FoodType[]>([]);
   const [selectedDifficulty, setSelectedDifficulty] = useState<Recipe['difficulty']>();
   const [maxPrepTime, setMaxPrepTime] = useState<number>(60);
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchRecipes = async () => {
+      const snapshot = await get(dbRef(database, 'recipes'));
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        setRecipes(Object.values(data) as Recipe[]);
+      } else {
+        setRecipes([]);
+      }
+      setLoading(false);
+    };
+    fetchRecipes();
+  }, []);
 
   const foodTypes: FoodType[] = ['baked', 'sweet', 'fresh', 'cold', 'warm', 'spicy', 'natural', 'energetic'];
   const difficulties: Recipe['difficulty'][] = ['easy', 'medium', 'hard'];

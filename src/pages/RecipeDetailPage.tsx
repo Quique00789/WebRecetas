@@ -1,21 +1,40 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Printer, Share2, Bookmark } from 'lucide-react';
-import { getRecipeById } from '../data/recipes';
+import { ref as dbRef, get } from 'firebase/database';
+import { database } from '../lib/firebase';
 import RecipeHeader from '../components/RecipeHeader';
 import RecipeIngredients from '../components/RecipeIngredients';
 import RecipeInstructions from '../components/RecipeInstructions';
+import { ArrowLeft, Printer, Share2, Bookmark } from 'lucide-react';
+import { Recipe } from '../types';
 
 const RecipeDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const recipe = getRecipeById(id || '');
+  const [recipe, setRecipe] = useState<Recipe | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchRecipe = async () => {
+      const snapshot = await get(dbRef(database, `recipes/${id}`));
+      if (snapshot.exists()) {
+        setRecipe(snapshot.val() as Recipe);
+      } else {
+        setRecipe(null);
+      }
+      setLoading(false);
+    };
+    fetchRecipe();
+  }, [id]);
+
+  if (loading) {
+    return <div className="container mx-auto px-4 py-16 text-center">Loading...</div>;
+  }
 
   if (!recipe) {
     return (
       <div className="container mx-auto px-4 py-16 text-center">
         <h1 className="text-2xl font-semibold text-gray-700 mb-4">Recipe not found</h1>
-        <p className="text-gray-500 mb-8">The recipe you're looking for doesn't exist.</p>
         <button
           onClick={() => navigate('/')}
           className="bg-pink-500 hover:bg-pink-600 text-white font-medium py-2 px-6 rounded-lg transition"
