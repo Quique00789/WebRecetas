@@ -1,13 +1,42 @@
-import React, { useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
+import { ref as dbRef, get, remove } from 'firebase/database';
+import { database } from '../lib/firebase';
 import { useAuth } from '../contexts/AuthContext';
+import RecipeGrid from '../components/RecipeGrid';
+import { Recipe } from '../types';
 import { Camera, Loader } from 'lucide-react';
 
 const ProfilePage: React.FC = () => {
   const { currentUser, updateUserProfile, uploadProfileImage } = useAuth();
-  const [loading, setLoading] = useState(false);
+  const [myRecipes, setMyRecipes] = useState<Recipe[]>([]);
+  const [loading, setLoading] = useState(true);
   const [displayName, setDisplayName] = useState(currentUser?.displayName || '');
   const [bio, setBio] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!currentUser) return;
+    const fetchRecipes = async () => {
+      const snapshot = await get(dbRef(database, 'recipes'));
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        // Filtra solo las recetas del usuario actual
+        const recipesArray = Object.values(data) as Recipe[];
+        setMyRecipes(recipesArray.filter(r => r.userId === currentUser.uid));
+      } else {
+        setMyRecipes([]);
+      }
+      setLoading(false);
+    };
+    fetchRecipes();
+  }, [currentUser]);
+
+  // Eliminar receta
+  const handleDelete = async (id: string) => {
+    if (!window.confirm('¿Seguro que quieres eliminar esta receta?')) return;
+    await remove(dbRef(database, `recipes/${id}`));
+    setMyRecipes(myRecipes.filter(r => r.id !== id));
+  };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files?.length) return;
@@ -106,6 +135,32 @@ const ProfilePage: React.FC = () => {
               )}
             </button>
           </form>
+        </div>
+
+        <div className="mt-12">
+          <h2 className="text-2xl font-bold mb-6">Mis Recetas</h2>
+          {loading ? (
+            <div>Cargando...</div>
+          ) : myRecipes.length === 0 ? (
+            <div>No has subido recetas aún.</div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+              {myRecipes.map(recipe => (
+                <div key={recipe.id} className="relative">
+                  <RecipeGrid recipes={[recipe]} />
+                  <div className="absolute top-2 right-2 flex gap-2">
+                    <button
+                      onClick={() => handleDelete(recipe.id)}
+                      className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
+                    >
+                      Eliminar
+                    </button>
+                    {/* Aquí puedes agregar un botón para editar */}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

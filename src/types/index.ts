@@ -1,6 +1,7 @@
 export type FoodType = 'baked' | 'sweet' | 'fresh' | 'cold' | 'warm' | 'spicy' | 'natural' | 'energetic';
 
 export interface Recipe {
+  userId: string;
   id: string;
   title: string;
   category: 'breakfast' | 'lunch' | 'dinner' | 'dessert';
