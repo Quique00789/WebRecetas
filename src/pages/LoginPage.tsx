@@ -63,6 +63,10 @@ const LoginPage: React.FC = () => {
             <Link to="/register" className="font-medium text-amber-600 hover:text-amber-500">
               Sign up
             </Link>
+            <br />
+            <Link to="/password-recovery-info" className="font-medium text-amber-600 hover:text-amber-500">
+              ¿Olvidaste tu contraseña? Ver métodos de recuperación
+            </Link>
           </p>
         </div>
 
