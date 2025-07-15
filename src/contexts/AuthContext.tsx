@@ -45,36 +45,80 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   const signup = async (email: string, password: string) => {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    setCurrentUser(userCredential.user);
-    await set(dbRef(database, `users/${userCredential.user.uid}`), {
-      email: userCredential.user.email,
-      createdAt: new Date().toISOString()
-    });
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+      
+      // Guardar datos del usuario en la base de datos
+      await set(dbRef(database, `users/${user.uid}`), {
+        email: user.email,
+        displayName: user.displayName || null,
+        photoURL: user.photoURL || null,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      });
+      
+      setCurrentUser(user);
+    } catch (error) {
+      console.error('Error during signup:', error);
+      throw error;
+    }
   };
 
   const login = async (email: string, password: string) => {
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    setCurrentUser(userCredential.user);
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      setCurrentUser(userCredential.user);
+    } catch (error) {
+      console.error('Error during login:', error);
+      throw error;
+    }
   };
 
   const loginWithGoogle = async () => {
-    const provider = new GoogleAuthProvider();
-    const result = await signInWithPopup(auth, provider);
-    setCurrentUser(result.user);
-    
-    // Store user data in Realtime Database
-    await set(dbRef(database, `users/${result.user.uid}`), {
-      email: result.user.email,
-      displayName: result.user.displayName,
-      photoURL: result.user.photoURL,
-      createdAt: new Date().toISOString()
-    });
+    try {
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      
+      // Verificar si el usuario ya existe en la base de datos
+      const userSnapshot = await get(dbRef(database, `users/${user.uid}`));
+      
+      if (!userSnapshot.exists()) {
+        // Si es un usuario nuevo, guardarlo en la base de datos
+        await set(dbRef(database, `users/${user.uid}`), {
+          email: user.email,
+          displayName: user.displayName,
+          photoURL: user.photoURL,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        });
+      } else {
+        // Si ya existe, actualizar la información
+        await set(dbRef(database, `users/${user.uid}`), {
+          ...userSnapshot.val(),
+          email: user.email,
+          displayName: user.displayName,
+          photoURL: user.photoURL,
+          updatedAt: new Date().toISOString()
+        });
+      }
+      
+      setCurrentUser(user);
+    } catch (error) {
+      console.error('Error during Google login:', error);
+      throw error;
+    }
   };
 
   const logout = async () => {
-    await signOut(auth);
-    setCurrentUser(null);
+    try {
+      await signOut(auth);
+      setCurrentUser(null);
+    } catch (error) {
+      console.error('Error during logout:', error);
+      throw error;
+    }
   };
 
   const uploadProfileImage = async (file: File): Promise<string> => {
@@ -97,7 +141,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     // Update Realtime Database profile
+    const userSnapshot = await get(dbRef(database, `users/${currentUser.uid}`));
+    const existingData = userSnapshot.exists() ? userSnapshot.val() : {};
+    
     await set(dbRef(database, `users/${currentUser.uid}`), {
+      ...existingData,
       ...data,
       email: currentUser.email,
       updatedAt: new Date().toISOString()
