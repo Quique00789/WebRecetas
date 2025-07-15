@@ -6,6 +6,8 @@ import { FoodType } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 
 const SubmitRecipePage: React.FC = () => {
+  const { currentUser } = useAuth();
+
   // Form states
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState('');
@@ -21,7 +23,6 @@ const SubmitRecipePage: React.FC = () => {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const { currentUser } = useAuth ? useAuth() : { currentUser: null };
 
   const foodTypes: FoodType[] = ['baked', 'sweet', 'fresh', 'cold', 'warm', 'spicy', 'natural', 'energetic'];
 
@@ -98,8 +99,9 @@ const SubmitRecipePage: React.FC = () => {
         imageUrl,
         isFeatured: false,
         foodTypes: selectedFoodTypes,
-        userId: currentUser?.uid || null, // <-- Guarda el UID
-        userName: currentUser?.displayName || currentUser?.email || 'Anónimo', // Opcional: nombre
+        userId: currentUser?.uid,
+        userName: currentUser?.displayName || currentUser?.email?.split('@')[0] || 'Anonymous',
+        createdAt: new Date().toISOString(),
       };
 
       // 3. Guardar la receta bajo el ID correspondiente

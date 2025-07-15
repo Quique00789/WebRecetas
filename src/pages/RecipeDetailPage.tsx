@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ref as dbRef, get, push, onValue } from 'firebase/database';
+import { ref as dbRef, get, push, onValue, remove } from 'firebase/database';
 import { database } from '../lib/firebase';
 import RecipeHeader from '../components/RecipeHeader';
 import RecipeIngredients from '../components/RecipeIngredients';
 import RecipeInstructions from '../components/RecipeInstructions';
-import { ArrowLeft, Printer, Share2, Bookmark } from 'lucide-react';
+import { ArrowLeft, Printer, Share2, Bookmark, Edit, Trash2 } from 'lucide-react';
 import { Recipe } from '../types';
-//import { toast } from 'react-hot-toast'; // Si usas alguna librería de toast, si no, usa alert
 import { useAuth } from '../contexts/AuthContext';
 
 const RecipeDetailPage: React.FC = () => {
@@ -17,7 +16,7 @@ const RecipeDetailPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [comments, setComments] = useState<{text: string; user: string; date: string;}[]>([]);
   const [commentText, setCommentText] = useState('');
-  const { currentUser } = useAuth ? useAuth() : { currentUser: null };
+  const { currentUser } = useAuth();
 
   useEffect(() => {
     const fetchRecipe = async () => {
@@ -90,6 +89,25 @@ const RecipeDetailPage: React.FC = () => {
     setCommentText('');
   };
 
+  // Eliminar receta (solo el autor puede hacerlo)
+  const handleDeleteRecipe = async () => {
+    if (!recipe || !currentUser || recipe.userId !== currentUser.uid) return;
+    
+    if (!window.confirm('Are you sure you want to delete this recipe? This action cannot be undone.')) return;
+    
+    try {
+      await remove(dbRef(database, `recipes/${recipe.id}`));
+      alert('Recipe deleted successfully!');
+      navigate('/profile');
+    } catch (error) {
+      console.error('Error deleting recipe:', error);
+      alert('Failed to delete recipe. Please try again.');
+    }
+  };
+
+  // Verificar si el usuario actual es el autor de la receta
+  const isAuthor = currentUser && recipe && recipe.userId === currentUser.uid;
+
   if (loading) {
     return <div className="container mx-auto px-4 py-16 text-center">Loading...</div>;
   }
@@ -122,6 +140,24 @@ const RecipeDetailPage: React.FC = () => {
 
       <div className="flex justify-end mb-8">
         <div className="flex space-x-3">
+          {isAuthor && (
+            <>
+              <button
+                className="bg-blue-100 text-blue-700 p-2 rounded-full hover:bg-blue-200 transition"
+                onClick={() => navigate(`/edit-recipe/${recipe.id}`)}
+                title="Edit recipe"
+              >
+                <Edit size={20} />
+              </button>
+              <button
+                className="bg-red-100 text-red-700 p-2 rounded-full hover:bg-red-200 transition"
+                onClick={handleDeleteRecipe}
+                title="Delete recipe"
+              >
+                <Trash2 size={20} />
+              </button>
+            </>
+          )}
           <button
             className="bg-purple-100 text-purple-700 p-2 rounded-full hover:bg-purple-200 transition"
             onClick={handlePrint}
@@ -146,28 +182,47 @@ const RecipeDetailPage: React.FC = () => {
       <div className="bg-white p-6 rounded-xl shadow-sm">
         <RecipeIngredients recipe={recipe} />
         <RecipeInstructions recipe={recipe} />
+        
+        {recipe.userName && (
+          <div className="mt-6 pt-6 border-t border-amber-200">
+            <p className="text-sm text-amber-700">
+              Recipe by: <span className="font-medium">{recipe.userName}</span>
+              {recipe.createdAt && (
+                <span className="ml-2">
+                  • {new Date(recipe.createdAt).toLocaleDateString()}
+                </span>
+              )}
+            </p>
+          </div>
+        )}
       </div>
 
       <div className="mt-10">
-        <h3 className="text-xl font-semibold text-amber-900 mb-4">Comentarios</h3>
-        <form onSubmit={handleAddComment} className="flex gap-2 mb-6">
-          <input
-            type="text"
-            value={commentText}
-            onChange={e => setCommentText(e.target.value)}
-            placeholder="Escribe un comentario..."
-            className="flex-1 px-4 py-2 rounded-lg border border-amber-200 focus:outline-none"
-          />
-          <button
-            type="submit"
-            className="bg-amber-500 text-white px-4 py-2 rounded-lg hover:bg-amber-600 transition"
-            disabled={!commentText.trim()}
-          >
-            Publicar
-          </button>
-        </form>
+        <h3 className="text-xl font-semibold text-amber-900 mb-4">Comments</h3>
+        {currentUser ? (
+          <form onSubmit={handleAddComment} className="flex gap-2 mb-6">
+            <input
+              type="text"
+              value={commentText}
+              onChange={e => setCommentText(e.target.value)}
+              placeholder="Write a comment..."
+              className="flex-1 px-4 py-2 rounded-lg border border-amber-200 focus:outline-none"
+            />
+            <button
+              type="submit"
+              className="bg-amber-500 text-white px-4 py-2 rounded-lg hover:bg-amber-600 transition"
+              disabled={!commentText.trim()}
+            >
+              Post
+            </button>
+          </form>
+        ) : (
+          <p className="text-amber-700 mb-6">
+            <a href="/login" className="text-amber-600 hover:text-amber-500">Log in</a> to leave a comment.
+          </p>
+        )}
         <div className="space-y-4">
-          {comments.length === 0 && <div className="text-amber-700">Aún no hay comentarios.</div>}
+          {comments.length === 0 && <div className="text-amber-700">No comments yet.</div>}
           {comments.map((c, i) => (
             <div key={i} className="bg-amber-50 p-3 rounded-lg">
               <div className="text-sm text-amber-900 font-semibold">{c.user}</div>

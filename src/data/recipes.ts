@@ -12,6 +12,9 @@ export const recipes: Recipe[] = [
     isFeatured: true,
     imageUrl: 'https://images.pexels.com/photos/376464/pexels-photo-376464.jpeg',
     foodTypes: ['baked', 'sweet'],
+    userId: undefined,
+    userName: 'Recipe Team',
+    createdAt: '2024-01-01T00:00:00.000Z',
     ingredients: [
       '2 cups all-purpose flour',
       '2 tbsp sugar',
@@ -46,6 +49,9 @@ export const recipes: Recipe[] = [
     isFeatured: false,
     imageUrl: 'https://images.pexels.com/photos/1351238/pexels-photo-1351238.jpeg',
     foodTypes: ['fresh', 'natural'],
+    userId: undefined,
+    userName: 'Recipe Team',
+    createdAt: '2024-01-01T00:00:00.000Z',
     ingredients: [
       '2 slices whole grain bread',
       '1 ripe avocado',
@@ -77,6 +83,9 @@ export const recipes: Recipe[] = [
     isFeatured: true,
     imageUrl: 'https://images.pexels.com/photos/1211887/pexels-photo-1211887.jpeg',
     foodTypes: ['fresh', 'cold', 'natural'],
+    userId: undefined,
+    userName: 'Recipe Team',
+    createdAt: '2024-01-01T00:00:00.000Z',
     ingredients: [
       '1 large cucumber, diced',
       '4 large tomatoes, diced',
@@ -108,6 +117,9 @@ export const recipes: Recipe[] = [
     isFeatured: true,
     imageUrl: 'https://images.pexels.com/photos/230325/pexels-photo-230325.jpeg',
     foodTypes: ['baked', 'sweet', 'warm'],
+    userId: undefined,
+    userName: 'Recipe Team',
+    createdAt: '2024-01-01T00:00:00.000Z',
     ingredients: [
       '2 1/4 cups all-purpose flour',
       '1 tsp baking soda',
@@ -142,6 +154,9 @@ export const recipes: Recipe[] = [
     isFeatured: false,
     imageUrl: 'https://images.pexels.com/photos/1410235/pexels-photo-1410235.jpeg',
     foodTypes: ['warm', 'spicy', 'natural'],
+    userId: undefined,
+    userName: 'Recipe Team',
+    createdAt: '2024-01-01T00:00:00.000Z',
     ingredients: [
       '2 tbsp vegetable oil',
       '2 cloves garlic, minced',
@@ -179,6 +194,9 @@ export const recipes: Recipe[] = [
     isFeatured: false,
     imageUrl: 'https://images.pexels.com/photos/1092730/pexels-photo-1092730.jpeg',
     foodTypes: ['cold', 'sweet', 'energetic'],
+    userId: undefined,
+    userName: 'Recipe Team',
+    createdAt: '2024-01-01T00:00:00.000Z',
     ingredients: [
       '1 frozen banana',
       '1 cup mixed frozen berries',

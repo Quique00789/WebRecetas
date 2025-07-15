@@ -1,7 +1,7 @@
 export type FoodType = 'baked' | 'sweet' | 'fresh' | 'cold' | 'warm' | 'spicy' | 'natural' | 'energetic';
 
 export interface Recipe {
-  userId: string;
+  userId?: string;
   id: string;
   title: string;
   category: 'breakfast' | 'lunch' | 'dinner' | 'dessert';
@@ -14,4 +14,6 @@ export interface Recipe {
   ingredients: string[];
   instructions: string[];
   foodTypes: FoodType[];
+  userName?: string;
+  createdAt?: string;
 }
