@@ -13,6 +13,7 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import ProfilePage from './pages/ProfilePage';
 import PasswordRecoveryInfoPage from './pages/PasswordRecoveryInfoPage';
+import PhoneRecoveryPage from './pages/PhoneRecoveryPage';
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
               <Route path="/register" element={<RegisterPage />} />
               <Route path="/profile" element={<ProfilePage />} />
               <Route path="/password-recovery-info" element={<PasswordRecoveryInfoPage />} />
+              <Route path="/phone-recovery" element={<PhoneRecoveryPage />} />
             </Routes>
           </main>
           <Footer />

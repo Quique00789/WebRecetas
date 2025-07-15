@@ -7,7 +7,8 @@ import {
   onAuthStateChanged,
   GoogleAuthProvider,
   signInWithPopup,
-  updateProfile
+  updateProfile,
+  sendPasswordResetEmail
 } from 'firebase/auth';
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { ref as dbRef, set, get } from 'firebase/database';
@@ -17,6 +18,7 @@ interface UserProfile {
   displayName?: string;
   photoURL?: string;
   bio?: string;
+  phone?: string;
 }
 
 interface AuthContextType {
@@ -28,6 +30,7 @@ interface AuthContextType {
   logout: () => Promise<void>;
   updateUserProfile: (data: UserProfile) => Promise<void>;
   uploadProfileImage: (file: File) => Promise<string>;
+  resetPassword: (email: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -158,6 +161,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   };
 
+  const resetPassword = async (email: string) => {
+    try {
+      await sendPasswordResetEmail(auth, email);
+    } catch (error) {
+      console.error('Error sending password reset email:', error);
+      throw error;
+    }
+  };
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
@@ -186,7 +197,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     loginWithGoogle,
     logout,
     updateUserProfile,
-    uploadProfileImage
+    uploadProfileImage,
+    resetPassword
   };
 
   return (

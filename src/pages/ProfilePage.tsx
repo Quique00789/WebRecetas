@@ -14,6 +14,7 @@ const ProfilePage: React.FC = () => {
   const [profileLoading, setProfileLoading] = useState(false);
   const [displayName, setDisplayName] = useState(currentUser?.displayName || '');
   const [bio, setBio] = useState('');
+  const [phone, setPhone] = useState('');
   const [editingRecipe, setEditingRecipe] = useState<Recipe | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -38,6 +39,7 @@ const ProfilePage: React.FC = () => {
       if (userSnapshot.exists()) {
         const userData = userSnapshot.val();
         setBio(userData.bio || '');
+        setPhone(userData.phone || '');
       }
     };
     
@@ -93,7 +95,7 @@ const ProfilePage: React.FC = () => {
     e.preventDefault();
     try {
       setProfileLoading(true);
-      await updateUserProfile({ displayName, bio });
+      await updateUserProfile({ displayName, bio, phone });
       alert('Profile updated successfully!');
     } catch (error) {
       console.error('Error updating profile:', error);
@@ -171,6 +173,21 @@ const ProfilePage: React.FC = () => {
               />
             </div>
 
+            <div>
+              <label className="block text-amber-900 font-medium mb-2">
+                Teléfono (para recuperación de contraseña)
+              </label>
+              <input
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className="w-full px-4 py-2 rounded-lg border border-amber-200 focus:outline-none focus:ring-2 focus:ring-amber-300"
+                placeholder="+52 55 1234 5678"
+              />
+              <p className="text-sm text-amber-600 mt-1">
+                Opcional: Permite recuperar tu contraseña por SMS o llamada
+              </p>
+            </div>
             <button
               type="submit"
               disabled={profileLoading}
