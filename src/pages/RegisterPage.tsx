@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import ReCAPTCHA from 'react-google-recaptcha';
+import React, { useRef, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { UserPlus, Loader } from 'lucide-react';
@@ -11,17 +12,27 @@ const RegisterPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { signup, loginWithGoogle } = useAuth();
+  const recaptchaRef = useRef<ReCAPTCHA>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (password !== confirmPassword) {
       return setError('Passwords do not match');
     }
+    setError('');
+    setLoading(true);
 
     try {
-      setError('');
-      setLoading(true);
+      // Ejecuta el captcha
+      const token = await recaptchaRef.current?.executeAsync();
+      recaptchaRef.current?.reset();
+
+      if (!token) {
+        setError('Captcha verification failed.');
+        setLoading(false);
+        return;
+      }
+
       await signup(email, password);
       navigate('/profile');
     } catch (err) {
@@ -155,6 +166,12 @@ const RegisterPage: React.FC = () => {
             </button>
           </div>
         </form>
+
+        <ReCAPTCHA
+          sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
+          size="invisible"
+          ref={recaptchaRef}
+        />
       </div>
     </div>
   );

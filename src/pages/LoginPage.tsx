@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { LogIn } from 'lucide-react';
+import ReCAPTCHA from 'react-google-recaptcha';
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -10,13 +11,26 @@ const LoginPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { login, loginWithGoogle } = useAuth();
+  const recaptchaRef = useRef<ReCAPTCHA>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+    setError('');
+    setLoading(true);
+
     try {
-      setError('');
-      setLoading(true);
+      // Ejecuta el captcha
+      const token = await recaptchaRef.current?.executeAsync();
+      recaptchaRef.current?.reset();
+
+      if (!token) {
+        setError('Captcha verification failed.');
+        setLoading(false);
+        return;
+      }
+
+      // Aquí podrías enviar el token a tu backend para validación adicional si lo necesitas
+
       await login(email, password);
       navigate('/');
     } catch (err) {
@@ -94,6 +108,11 @@ const LoginPage: React.FC = () => {
             </div>
           </div>
 
+          <ReCAPTCHA
+            sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
+            size="invisible"
+            ref={recaptchaRef}
+          />
           <div className="space-y-4">
             <button
               type="submit"
