@@ -7,6 +7,7 @@ import RecipeIngredients from '../components/RecipeIngredients';
 import RecipeInstructions from '../components/RecipeInstructions';
 import { ArrowLeft, Printer, Share2, Bookmark } from 'lucide-react';
 import { Recipe } from '../types';
+import { toast } from 'react-hot-toast'; // Si usas alguna librería de toast, si no, usa alert
 
 const RecipeDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -26,6 +27,40 @@ const RecipeDetailPage: React.FC = () => {
     };
     fetchRecipe();
   }, [id]);
+
+  // Guardar receta en localStorage
+  const handleSave = () => {
+    if (!recipe) return;
+    const saved = JSON.parse(localStorage.getItem('savedRecipes') || '[]');
+    const exists = saved.some((r: Recipe) => r.id === recipe.id);
+    if (exists) {
+      // Puedes usar toast o alert
+      alert('Recipe already saved!');
+      return;
+    }
+    saved.push(recipe);
+    localStorage.setItem('savedRecipes', JSON.stringify(saved));
+    alert('Recipe saved!');
+  };
+
+  // Compartir receta
+  const handleShare = () => {
+    const url = window.location.href;
+    if (navigator.share) {
+      navigator.share({
+        title: recipe?.title,
+        url,
+      });
+    } else {
+      navigator.clipboard.writeText(url);
+      alert('Link copied to clipboard!');
+    }
+  };
+
+  // Imprimir receta
+  const handlePrint = () => {
+    window.print();
+  };
 
   if (loading) {
     return <div className="container mx-auto px-4 py-16 text-center">Loading...</div>;
@@ -59,13 +94,22 @@ const RecipeDetailPage: React.FC = () => {
 
       <div className="flex justify-end mb-8">
         <div className="flex space-x-3">
-          <button className="bg-purple-100 text-purple-700 p-2 rounded-full hover:bg-purple-200 transition">
+          <button
+            className="bg-purple-100 text-purple-700 p-2 rounded-full hover:bg-purple-200 transition"
+            onClick={handlePrint}
+          >
             <Printer size={20} />
           </button>
-          <button className="bg-green-100 text-green-700 p-2 rounded-full hover:bg-green-200 transition">
+          <button
+            className="bg-green-100 text-green-700 p-2 rounded-full hover:bg-green-200 transition"
+            onClick={handleShare}
+          >
             <Share2 size={20} />
           </button>
-          <button className="bg-pink-100 text-pink-700 p-2 rounded-full hover:bg-pink-200 transition">
+          <button
+            className="bg-pink-100 text-pink-700 p-2 rounded-full hover:bg-pink-200 transition"
+            onClick={handleSave}
+          >
             <Bookmark size={20} />
           </button>
         </div>
