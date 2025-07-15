@@ -19,7 +19,7 @@ const LoginPage: React.FC = () => {
     setLoading(true);
 
     try {
-      // Ejecuta el captcha
+      // Ejecuta el captcha SOLO para email/password
       const token = await recaptchaRef.current?.executeAsync();
       recaptchaRef.current?.reset();
 
@@ -28,8 +28,6 @@ const LoginPage: React.FC = () => {
         setLoading(false);
         return;
       }
-
-      // Aquí podrías enviar el token a tu backend para validación adicional si lo necesitas
 
       await login(email, password);
       navigate('/');
@@ -44,6 +42,7 @@ const LoginPage: React.FC = () => {
     try {
       setError('');
       setLoading(true);
+      // NO ejecutar captcha aquí
       await loginWithGoogle();
       navigate('/');
     } catch (err) {
