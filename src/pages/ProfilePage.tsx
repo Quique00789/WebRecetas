@@ -333,6 +333,12 @@ const EditRecipeModal: React.FC<EditRecipeModalProps> = ({ recipe, onSave, onCan
                   required
                 >
                   <option value="easy">Easy</option>
+                  <option value="medium">Medium</option>
+                  <option value="hard">Hard</option>
+                </select>
+              </div>
+            </div>
+
             <div className="grid grid-cols-3 gap-4">
               <div>
                 <label className="block text-amber-900 font-medium mb-2">Prep Time (min)</label>
@@ -368,7 +374,7 @@ const EditRecipeModal: React.FC<EditRecipeModalProps> = ({ recipe, onSave, onCan
                 />
               </div>
             </div>
-                  <option value="medium">Medium</option>
+
             <div>
               <label className="block text-amber-900 font-medium mb-2">Image URL</label>
               <input
@@ -379,7 +385,7 @@ const EditRecipeModal: React.FC<EditRecipeModalProps> = ({ recipe, onSave, onCan
                 required
               />
             </div>
-                  <option value="hard">Hard</option>
+
             <div>
               <label className="block text-amber-900 font-medium mb-2">Ingredients</label>
               {ingredients.map((ingredient, index) => (
@@ -413,7 +419,7 @@ const EditRecipeModal: React.FC<EditRecipeModalProps> = ({ recipe, onSave, onCan
                 + Add Ingredient
               </button>
             </div>
-                </select>
+
             <div>
               <label className="block text-amber-900 font-medium mb-2">Instructions</label>
               {instructions.map((instruction, index) => (
@@ -450,7 +456,7 @@ const EditRecipeModal: React.FC<EditRecipeModalProps> = ({ recipe, onSave, onCan
                 + Add Instruction
               </button>
             </div>
-              </div>
+
             <div className="flex gap-4 pt-4">
               <button
                 type="submit"
@@ -472,5 +478,5 @@ const EditRecipeModal: React.FC<EditRecipeModalProps> = ({ recipe, onSave, onCan
     </div>
   );
 };
-            </div>
+
 export default ProfilePage;
